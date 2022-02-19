@@ -1,0 +1,32 @@
+digraph G{
+rankdir=LR
+edge[color=white]
+Node0[shape = record, label = " <index0> index 0 | { Prev 2 | Data 0 | <next0> Next 6 } " ];
+Node0->Node1;
+Node1[shape = record, label = " <index1> index 1 | { Prev 5 | Data 10 | <next1> Next 4 } " ];
+Node1->Node2;
+Node2[shape = record, label = " <index2> index 2 | { Prev 3 | Data 100 | <next2> Next 0 } " ];
+Node2->Node3;
+Node3[shape = record, label = " <index3> index 3 | { Prev 4 | Data 30 | <next3> Next 2 } " ];
+Node3->Node4;
+Node4[shape = record, label = " <index4> index 4 | { Prev 1 | Data 25 | <next4> Next 3 } " ];
+Node4->Node5;
+Node5[shape = record, label = " <index5> index 5 | { Prev 6 | Data 5 | <next5> Next 1 } " ];
+Node5->Node6;
+Node6[shape = record, label = " <index6> index 6 | { Prev 0 | Data 1 | <next6> Next 5 } " ];
+Node6->Node7;
+Node7[shape = record, label = " <index7> index 7 | { Prev -1 | Data 0 | <next7> Next -8 } " ];
+Node7->Node8;
+Node8[shape = record, label = " <index8> index 8 | { Prev -1 | Data 0 | <next8> Next -9 } " ];
+Node8->Node9;
+Node9[shape = record, label = " <index9> index 9 | { Prev -1 | Data 0 | <next9> Next -10 } " ];
+edge[color=black]
+Node6:<next6> -> Node5:<index5>;
+Node5:<next5> -> Node1:<index1>;
+Node1:<next1> -> Node4:<index4>;
+Node4:<next4> -> Node3:<index3>;
+Node3:<next3> -> Node2:<index2>;
+"head: 6" -> Node6:<index6>
+Node2:<index2> -> "tail: 2"
+"free: 7" -> Node7:<index7>
+}

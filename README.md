@@ -88,8 +88,42 @@ Tail item removed from the list
 The function returns the value of the deleted element
 --------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------
+void GraphDump(const char * const graphname = "graph");
 
+Precondition:
+[graphname] is a string containing the name that will be used to name the file with the list dump. By default "graph"
 
+Postcondition:
+There are 2 files in the project folder .dot and .png
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+void Dump();
 
+Postcondition:
+Console dump and information about the contents of the list
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+void Sorting();
+
+Postcondition:
+The list is sorted so that the logical order coincides with the physical one
+----------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
+bool ListIsSoreted();
+
+Postcondition:
+Returns the fact that the list is sorted
+----------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
+int TranslateIndex(int logic_index);
+
+Precondition:
+[logic_index] is the logical number of the node in the list
+
+Postcondition:
+The function returns the physical number of the cell in the array where the node is located
+
+Try to save cell numbers using the Insert() return value.
+-----------------------------------------------------------------------------------------
 ```
 

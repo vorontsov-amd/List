@@ -91,7 +91,8 @@ The function returns the value of the deleted element
 void GraphDump(const char * const graphname = "graph");
 
 Precondition:
-[graphname] is a string containing the name that will be used to name the file with the list dump. By default "graph"
+[graphname] is a string containing the name that will be used to name the file with the list dump.
+By default "graph"
 
 Postcondition:
 There are 2 files in the project folder .dot and .png

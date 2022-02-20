@@ -24,7 +24,7 @@
 
 ```c++
 --------------------------------------------------------------------------------------
-int Incert(int index, T& value);
+int Incert(int index, const T& value);
 
 Precondition: 
 [index] points to the memory cell after which we want to insert the element
@@ -35,7 +35,7 @@ Postcondition:
 The function returns the number of the cell in which the [value] element is placed
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
-int PushFront(T& value);
+int PushFront(const T& value);
 
 Precondition: 
 [value] - the element we want to insert into head the list
@@ -45,7 +45,7 @@ Postcondiyion:
 The function returns the number of the cell in which the [value] element is placed
 ---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
-int PushBack(T& value);
+int PushBack(const T& value);
 
 Precondition: 
 [value] - the element we want to insert into tail the list
@@ -84,7 +84,7 @@ The function returns the value of the deleted element
 T PopBack();
 
 Postcondition:
-Tai; item removed from the list
+Tail item removed from the list
 The function returns the value of the deleted element
 --------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 # Instalation
 
 ### To install this library, it is enough to register #include
+### In order to use a graphical dump, you must also [install dot](https://graphviz.gitlab.io/download/)
 
 # Graph Dump
 

@@ -114,6 +114,12 @@ namespace iLab
 			Data[i] = lst.Data[i];
 			Next[i] = lst.Next[i];
 		}
+		
+		
+		for (int i = lst.capacity; i < capacity; i++)
+		{
+			Data[i] = 0;
+		}
 		return *this;
 	}
 

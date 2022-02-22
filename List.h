@@ -135,7 +135,7 @@ namespace iLab
 		return Insert(Prev[0], value);
 	}
 
-	template <typename T> int		 List<typename T>::PushFront			(const T& value)
+	template <typename T> int		 List<typename T>::PushFront				(const T& value)
 	{
 		return Insert(0, value);
 	}
@@ -175,7 +175,7 @@ namespace iLab
 		return Data[index];
 	}
 
-	template <typename T> void		 List<typename T>::GraphDump			(const char * const graphname)
+	template <typename T> void		 List<typename T>::GraphDump				(const char * const graphname)
 	{				
 		size_t length = strlen(graphname) + 40;
 		char* command = (char*)calloc(length, sizeof(char));
@@ -252,7 +252,7 @@ namespace iLab
 		list_is_sorted = true;
 	}
 
-	template <typename T> int		 List<typename T>::TranslateIndex		(int logic_index)
+	template <typename T> int		 List<typename T>::TranslateIndex			(int logic_index)
 	{		
 		int real_index = Next[0];
 		for (int i = 1; i < logic_index; i++)
@@ -260,7 +260,7 @@ namespace iLab
 		return real_index;
 	}
 
-	template <typename T> void		 List<typename T>::ListResize			()
+	template <typename T> void		 List<typename T>::ListResize				()
 	{
 		int* NewPrev = (int*)_recalloc(Prev, 2 * capacity, sizeof(int));
 		T*   NewData = (T*)  _recalloc(Data, 2 * capacity, sizeof(T));
@@ -284,17 +284,17 @@ namespace iLab
 
 	}
 
-	template <typename T> inline int	 List<typename T>::CheckValidDeleteIndex	(int index)
+	template <typename T> inline int	 List<typename T>::CheckValidDeleteIndex		(int index)
 	{
 		return index != 0 and Prev[index] != -1;
 	}	
 	
-	template <typename T> inline int	 List<typename T>::CheckValidInsertIndex	(int index)
+	template <typename T> inline int	 List<typename T>::CheckValidInsertIndex		(int index)
 	{
 		return Prev[index] != -1;
 	}
 
-	template <typename T> void		 List<typename T>::InitListArrays		(int first_index)
+	template <typename T> void		 List<typename T>::InitListArrays			(int first_index)
 	{
 		Next[0] = 1;
 		Prev[0] = first_index - 1;
@@ -307,7 +307,7 @@ namespace iLab
 		}
 	}
 
-	template<typename T> inline bool 	List<typename T>::ListIsSorted			()
+	template<typename T> inline bool 	List<typename T>::ListIsSorted				()
 	{
 		return list_is_sorted;
 	}

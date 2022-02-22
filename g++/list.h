@@ -287,12 +287,12 @@ namespace iLab
 
 	}
 
-	template <typename T> inline int List<T>::CheckValidDeleteIndex				(int index)
+	template <typename T> inline int 	List<T>::CheckValidDeleteIndex			(int index)
 	{
 		return index != 0 and Prev[index] != -1;
 	}	
 	
-	template <typename T> inline int List<T>::CheckValidInsertIndex				(int index)
+	template <typename T> inline int	 List<T>::CheckValidInsertIndex			(int index)
 	{
 		return Prev[index] != -1;
 	}
@@ -310,7 +310,7 @@ namespace iLab
 		}
 	}
 
-	template<typename T> inline bool List<T>::ListIsSorted			    		()
+	template<typename T> inline bool	 List<T>::ListIsSorted			    	()
 	{
 		return list_is_sorted;
 	}

@@ -20,8 +20,11 @@ namespace iLab
 	{
 	public:
 		List(size_t _capacity = START_LIST_CAPACITY);
+		List(const List<T>& lst);
 		~List();
 
+		List<T>& operator=(const List<T>& lst);
+		
 		void Dump();
 		void GraphDump(const char * const graphname = "graph");
 		
@@ -51,8 +54,8 @@ namespace iLab
 		inline int CheckValidDeleteIndex(int index);
 		void InitListArrays(int first_index);
 	};
-  
-	template <typename T>			 List<T>::List			      		(size_t _capacity)
+
+	template <typename T>			 List<T>::List					(size_t _capacity)
 	{
 		Prev = (int*)calloc(_capacity, sizeof(int));
 		Data =   (T*)calloc(_capacity, sizeof(T));
@@ -70,14 +73,58 @@ namespace iLab
 		InitListArrays(1);
 	}
 
-	template <typename T>			 List<T>::~List			          	()
+		template <typename T>			List<T>::List					(const List<T>& lst)
+	{
+		free = lst.free;
+		list_is_sorted = lst.list_is_sorted;
+		size = lst.size;
+		capacity = lst.capacity;
+
+		Prev = (int*)calloc(capacity, sizeof(int));
+		Data = (T*)  calloc(capacity, sizeof(T));
+		Next = (int*)calloc(capacity, sizeof(int));
+
+		assert(Prev);
+		assert(Data);
+		assert(Next);
+
+		for (int i = 0; i < capacity; i++)
+		{
+			Prev[i] = lst.Prev[i];
+			Data[i] = lst.Data[i];
+			Next[i] = lst.Next[i];
+		}
+	}
+
+	template <typename T> List<T>&	 List<T>::operator=					(const List<T>& lst)
+	{
+		while (capacity < lst.capacity)
+			ListResize();
+
+		InitListArrays(lst.capacity);
+
+		free = lst.free;
+		list_is_sorted = lst.list_is_sorted;
+		size = lst.size;
+
+
+		for (int i = 0; i < lst.capacity; i++)
+		{
+			Prev[i] = lst.Prev[i];
+			Data[i] = lst.Data[i];
+			Next[i] = lst.Next[i];
+		}
+		return *this;
+	}
+
+	template <typename T>			 List<T>::~List				()
 	{
 		std::free(Prev);
 		std::free(Data);
 		std::free(Next);
 	}
 
-	template <typename T> void		 List<T>::Dump			    		()
+	template <typename T> void		 List<T>::Dump					()
 	{
 		using std::cout;
 		using std::endl;
@@ -97,8 +144,8 @@ namespace iLab
 		cout << "\n\n";
 	}
 
-	template <typename T> int		 List<T>::Insert			      	(int index, const T& value)
-	{ 
+	template <typename T> int		 List<T>::Insert				(int index, const T& value)
+	{
 		bool status = CheckValidInsertIndex(index);
 		if (!status) return -1;
 		
@@ -133,17 +180,17 @@ namespace iLab
 		return RealIndex;
 	}
 
-	template <typename T> int		 List<T>::PushBack			     	(const T& value)
+	template <typename T> int		 List<T>::PushBack				(const T& value)
 	{
 		return Insert(Prev[0], value);
 	}
 
-	template <typename T> int		 List<T>::PushFront		     	 	(const T& value)
+	template <typename T> int		 List<T>::PushFront			(const T& value)
 	{
 		return Insert(0, value);
 	}
 
-	template <typename T> T			 List<T>::Delete			      	(int index)
+	template <typename T> T			 List<T>::Delete				(int index)
 	{
 		bool status = CheckValidDeleteIndex(index);
 		if (!status) return -1;
@@ -163,22 +210,22 @@ namespace iLab
 		return data;
 	}
 
-	template <typename T> T			 List<T>::PopBack			       	()
+	template <typename T> T			 List<T>::PopBack				()
 	{
 		return Delete(Prev[0]);
 	}
 
-	template <typename T> T			 List<T>::PopFront			       	()
+	template <typename T> T			 List<T>::PopFront				()
 	{
 		return Delete(Next[0]);
 	}
 
-	template <typename T> T			 List<T>::Show				        (int index)
+	template <typename T> T			 List<T>::Show					(int index)
 	{
 		return Data[index];
 	}
 
-	template <typename T> void		 List<T>::GraphDump			      	(const char * const graphname)
+	template <typename T> void		 List<T>::GraphDump			(const char * const graphname)
 	{				
 		size_t length = strlen(graphname) + 40;
 		char* command = (char*)calloc(length, sizeof(char));
@@ -236,7 +283,7 @@ namespace iLab
 		system(command);
 	}
 
-	template <typename T> void		 List<T>::Sorting		        	()
+	template <typename T> void		 List<T>::Sorting				()
 	{
 		T* SortList = (T*)calloc(capacity, sizeof(T));
 		int SortIndex = 1, DataIndex = Next[0];
@@ -255,7 +302,7 @@ namespace iLab
 		list_is_sorted = true;
 	}
 
-	template <typename T> int		 List<T>::TranslateIndex	      		(int logic_index)
+	template <typename T> int		 List<T>::TranslateIndex		(int logic_index)
 	{		
 		int real_index = Next[0];
 		for (int i = 1; i < logic_index; i++)
@@ -263,7 +310,7 @@ namespace iLab
 		return real_index;
 	}
 
-	template <typename T> void		 List<T>::ListResize	      			()
+	template <typename T> void		 List<T>::ListResize			()
 	{
 		int* NewPrev = (int*)realloc(Prev, 2 * capacity * sizeof(int));
 		T*   NewData = (T*)  realloc(Data, 2 * capacity * sizeof(T));
@@ -287,17 +334,17 @@ namespace iLab
 
 	}
 
-	template <typename T> inline int 	List<T>::CheckValidDeleteIndex			(int index)
+	template <typename T> inline int List<T>::CheckValidDeleteIndex(int index)
 	{
 		return index != 0 and Prev[index] != -1;
 	}	
 	
-	template <typename T> inline int	 List<T>::CheckValidInsertIndex			(int index)
+	template <typename T> inline int List<T>::CheckValidInsertIndex(int index)
 	{
 		return Prev[index] != -1;
 	}
 
-	template <typename T> void		 List<T>::InitListArrays	      		(int first_index)
+	template <typename T> void		 List<T>::InitListArrays		(int first_index)
 	{
 		Next[0] = 1;
 		Prev[0] = first_index - 1;
@@ -310,7 +357,7 @@ namespace iLab
 		}
 	}
 
-	template<typename T> inline bool	 List<T>::ListIsSorted			    	()
+	template<typename T> inline bool List<T>::ListIsSorted			()
 	{
 		return list_is_sorted;
 	}

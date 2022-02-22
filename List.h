@@ -5,21 +5,23 @@
 #include <cstdlib>
 #include <cassert>
 
-#define LOX printf("%d\n", __LINE__);
-
 static const int START_LIST_CAPACITY = 10;
 
-namespace lst
-{
-	using namespace std;
+#define ROUND 0
+#define LINEAR 1
+#define DUMP LINEAR
 
+namespace iLab
+{
 	template <typename T> class List
 	{
 	public:
 		List(size_t _capacity = START_LIST_CAPACITY);
 		~List();
+
 		void Dump();
 		void GraphDump(const char * const graphname = "graph");
+		
 		int PushBack(const T& value);
 		int PushFront(const T& value);
 		int Insert(int index, const T& value);
@@ -27,49 +29,42 @@ namespace lst
 		T Show(int index);
 		T PopFront();
 		T PopBack();
+
 		void Sorting();
+		inline bool ListIsSorted();
+		
 		int TranslateIndex(int logic_index);
 
 	private:
 		int* Prev;
-		T* Data;
+		T*   Data;
 		int* Next;
-		int free;
-		int head;
-		int tail;
+		int  free;
+		bool list_is_sorted;
 		size_t size;
 		size_t capacity;
 		void ListResize();
 		inline int CheckValidInsertIndex(int index);
 		inline int CheckValidDeleteIndex(int index);
+		void InitListArrays(int first_index);
 	};
 
 	template <typename T>			 List<typename T>::List					(size_t _capacity)
 	{
-		Prev = (int*)malloc(_capacity * sizeof(int));
-		Data =   (T*)calloc(_capacity,  sizeof(T));
-		Next = (int*)malloc(_capacity * sizeof(int));
+		Prev = (int*)calloc(_capacity, sizeof(int));
+		Data =   (T*)calloc(_capacity, sizeof(T));
+		Next = (int*)calloc(_capacity, sizeof(int));
 
 		assert(Prev);
 		assert(Data);
 		assert(Next);
 
 		free = 1;
-		head = 0;
-		tail = 0;
 		size = 0;
 		capacity = _capacity;
+		list_is_sorted = true;
 
-		Prev[0] = 0;
-		Prev[1] = -1;
-		Next[0] = 0;
-		Next[1] = -2;
-		for (int i = 2; i < capacity; i++)
-		{
-			Prev[i] = -1;
-			Next[i] = Next[i - 1] - 1;
-
-		}
+		InitListArrays(1);
 	}
 
 	template <typename T>			 List<typename T>::~List				()
@@ -81,9 +76,10 @@ namespace lst
 
 	template <typename T> void		 List<typename T>::Dump					()
 	{
+		using std::cout;
+		using std::endl;
+		
 		cout << "free: " << free << endl;
-		cout << "head: " << head << endl;
-		cout << "tail: " << tail << endl;
 		cout << "size: " << size << endl;
 		cout << "capacity: " << capacity << endl;
 
@@ -111,8 +107,6 @@ namespace lst
 		
 		if (size == 0)
 		{
-			head = free;
-			tail = free;
 			Data[free] = value;
 			Next[free] = 0;
 			Prev[free] = 0;
@@ -125,21 +119,20 @@ namespace lst
 			Next[free] = Next[index];
 			Prev[Next[index]] = free;
 			Next[index] = free;
-			if (index == tail)
-				tail = free;
-			if (index == 0)
-				head = free;
 		}
 
 		free = next_free;
 		size += 1;
+
+		if (!ListIsSorted() and index != Prev[0])
+			list_is_sorted = false;
 
 		return RealIndex;
 	}
 
 	template <typename T> int		 List<typename T>::PushBack				(const T& value)
 	{
-		return Insert(tail, value);
+		return Insert(Prev[0], value);
 	}
 
 	template <typename T> int		 List<typename T>::PushFront			(const T& value)
@@ -153,10 +146,6 @@ namespace lst
 		if (!status) return -1;
 		
 		T data = Data[index];
-		if (index == head)
-			head = Next[head];
-		if (index == tail)
-			tail = Prev[tail];
 		Next[Prev[index]] = Next[index];
 		Prev[Next[index]] = Prev[index];
 		Next[index] = -free;
@@ -164,32 +153,36 @@ namespace lst
 		free = index;
 		Data[index] = 0;
 		size--;
+
+		if ((!ListIsSorted() and index != Prev[0]) or (!ListIsSorted() and index != Next[0]))
+			list_is_sorted = false;
+
 		return data;
 	}
 
 	template <typename T> T			 List<typename T>::PopBack				()
 	{
-		return Delete(tail);
+		return Delete(Prev[0]);
 	}
 
 	template <typename T> T			 List<typename T>::PopFront				()
 	{
-		return Delete(head);
+		return Delete(Next[0]);
 	}
 
 	template <typename T> T			 List<typename T>::Show					(int index)
 	{
-		return data[index];
+		return Data[index];
 	}
 
 	template <typename T> void		 List<typename T>::GraphDump			(const char * const graphname)
-	{
+	{				
 		size_t length = strlen(graphname) + 40;
 		char* command = (char*)calloc(length, sizeof(char));
 		strcpy_s(command, length, graphname);
 		strcat_s(command, length, ".dot");
 		
-		ofstream dumpfile;
+		std::ofstream dumpfile;
 		dumpfile.open(command);
 
 		dumpfile << "digraph G{\n";
@@ -200,67 +193,68 @@ namespace lst
 		while (index != capacity)
 		{
 			dumpfile << "Node" << index << "[shape = record, label = \" <index" << index << "> index " << index;
-			dumpfile << " | { Prev " << Prev[index] << " | Data " << Data[index];
-			dumpfile << " | <next" << index << "> Next " << Next[index] << " } \" ];\n";
-
+			dumpfile << " | { Prev " << Prev[index];
+			dumpfile << " | Data "   << Data[index];
+			dumpfile << " | <next"   << index << "> Next " << Next[index] << " } \" ];\n";
+#if DUMP == LINEAR
 			if (index + 1 != capacity)
 				dumpfile << "Node" << index << "->Node" << index + 1 << ";\n";
+#endif
+
 			index++;
 		}
 
 		dumpfile << "edge[color=black]\n";
 
-		index = head;
+		index = Next[0];
 		while (Next[index] != 0)
 		{
 			dumpfile << "Node" << index << ":<next" << index << "> -> Node" << Next[index] << ":<index" << Next[index] << ">;\n";
 			index = Next[index];
 		}
-
-		dumpfile << "\"head: " << head << "\" -> Node" << head << ":<index" << head << ">\n";
-		dumpfile << "Node" << tail << ":<index" << tail << "> -> \"tail: " << tail << "\"\n";
+#if DUMP == ROUND
+		dumpfile << "Node" << index << ":<next" << index << ">->Node0:<index0>;\n";
+		dumpfile << "Node0:<next0> -> Node" << Next[0] << ":<index" << Next[0] << ">; \n";
+#endif
+		dumpfile << "\"head: " << Next[0] << "\" -> Node" << Next[0] << ":<index" << Next[0] << ">\n";
+		dumpfile << "Node" << Prev[0] << ":<index" << Prev[0] << "> -> \"tail: " << Prev[0] << "\"\n";
 		dumpfile << "\"free: " << free << "\" -> Node" << free << ":<index" << free << ">\n";
 
 
 		dumpfile << "}";
 		dumpfile.close();
 
-		strcpy_s(command, length, "dot -Tpng ");
+		strcpy_s(command, length, "dot -Tpdf ");
 		strcat_s(command, length, graphname);
 		strcat_s(command, length, ".dot");
 		strcat_s(command, length, " -o ");
 		strcat_s(command, length, graphname);
-		strcat_s(command, length, ".png");
+		strcat_s(command, length, ".pdf");
 		system(command);
 	}
 
 	template <typename T> void		 List<typename T>::Sorting				()
 	{
 		T* SortList = (T*)calloc(capacity, sizeof(T));
-		int SortIndex = 1, DataIndex = head;
-		for (SortIndex, DataIndex; DataIndex != Next[tail]; SortIndex++, DataIndex = Next[DataIndex])
+		int SortIndex = 1, DataIndex = Next[0];
+		for (SortIndex, DataIndex; DataIndex != Next[Prev[0]]; SortIndex++, DataIndex = Next[DataIndex])
 		{
 			SortList[SortIndex] = Data[DataIndex];
 			Next[SortIndex] = SortIndex + 1;
 			Prev[SortIndex] = SortIndex - 1;
 		}
 
-		head = 1;
-		tail = SortIndex - 1;
-		Next[tail] = 0;
-		free = SortIndex;
-		for (int i = free, k = 1; i < capacity; i++, k++)
-		{
-			Prev[i] = -1;
-			Next[i] = -free - k;
-		}
+		InitListArrays(SortIndex);
+
 		std::free(Data);
 		Data = SortList;
+
+		list_is_sorted = true;
 	}
 
 	template <typename T> int		 List<typename T>::TranslateIndex		(int logic_index)
 	{		
-		int real_index = head;
+		int real_index = Next[0];
 		for (int i = 1; i < logic_index; i++)
 			real_index = Next[real_index];
 		return real_index;
@@ -268,9 +262,9 @@ namespace lst
 
 	template <typename T> void		 List<typename T>::ListResize			()
 	{
-		int* NewPrev = (int*)realloc(Prev, 2 * capacity * sizeof(int));
-		T* NewData   = (T*)_recalloc(Data, 2 * capacity, sizeof(T));
-		int* NewNext = (int*)realloc(Next, 2 * capacity * sizeof(int));
+		int* NewPrev = (int*)_recalloc(Prev, 2 * capacity, sizeof(int));
+		T*   NewData = (T*)  _recalloc(Data, 2 * capacity, sizeof(T));
+		int* NewNext = (int*)_recalloc(Next, 2 * capacity, sizeof(int));
 
 		if (NewData and NewPrev and NewNext)
 		{
@@ -285,22 +279,36 @@ namespace lst
 		{
 			Prev[i] = -1;
 			Next[i] = Next[i - 1] - 1;
-
 		}
 		capacity = 2 * capacity;
 
 	}
 
-	template <typename T> inline int List<typename T>::CheckValidDeleteIndex(int index)
+	template <typename T> inline int	 List<typename T>::CheckValidDeleteIndex	(int index)
 	{
 		return index != 0 and Prev[index] != -1;
 	}	
 	
-	template <typename T> inline int List<typename T>::CheckValidInsertIndex(int index)
+	template <typename T> inline int	 List<typename T>::CheckValidInsertIndex	(int index)
 	{
 		return Prev[index] != -1;
 	}
+
+	template <typename T> void		 List<typename T>::InitListArrays		(int first_index)
+	{
+		Next[0] = 1;
+		Prev[0] = first_index - 1;
+		Next[Prev[0]] = 0;
+		free = first_index;
+		for (int i = first_index, k = 1; i < capacity; i++, k++)
+		{
+			Prev[i] = -1;
+			Next[i] = -free - k;
+		}
+	}
+
+	template<typename T> inline bool 	List<typename T>::ListIsSorted			()
+	{
+		return list_is_sorted;
+	}
 }
-
-
-

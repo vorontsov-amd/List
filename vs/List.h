@@ -13,6 +13,8 @@ static const int START_LIST_CAPACITY = 10;
 #define LINEAR 1
 #define DUMP LINEAR
 
+
+
 namespace iLab
 {
 	template <typename T> class List
@@ -24,22 +26,26 @@ namespace iLab
 
 		List<T>& operator=(const List<T>& lst);
 
-
 		void Dump();
 		void GraphDump(const char * const graphname = "graph");
 		
 		int PushBack(const T& value);
 		int PushFront(const T& value);
 		int Insert(int index, const T& value);
-		T Delete(int index);
+		int Delete(int index);
 		T Show(int index);
-		T PopFront();
-		T PopBack();
+		int PopFront();
+		int PopBack();
 
 		void Sorting();
 		inline bool ListIsSorted();
 		
 		int TranslateIndex(int logic_index);
+
+		size_t Size()
+		{
+			return this->size;
+		}
 
 	private:
 		int* Prev;
@@ -57,9 +63,9 @@ namespace iLab
 
 	template <typename T>			 List<typename T>::List					(size_t _capacity)
 	{
-		Prev = (int*)calloc(_capacity, sizeof(int));
-		Data =   (T*)calloc(_capacity, sizeof(T));
-		Next = (int*)calloc(_capacity, sizeof(int));
+		Prev = new int[_capacity] {};
+		Data = new T[_capacity] {};
+		Next = new int[_capacity] {};
 
 		assert(Prev);
 		assert(Data);
@@ -80,9 +86,9 @@ namespace iLab
 		size = lst.size;
 		capacity = lst.capacity;
 
-		Prev = (int*)calloc(capacity, sizeof(int));
-		Data = (T*)  calloc(capacity, sizeof(T));
-		Next = (int*)calloc(capacity, sizeof(int));
+		Prev = new int[capacity];
+		Data = new T[capacity];
+		Next = new int [capacity];
 
 		assert(Prev);
 		assert(Data);
@@ -114,11 +120,12 @@ namespace iLab
 			Data[i] = lst.Data[i];
 			Next[i] = lst.Next[i];
 		}
-		
-		for (int i = lst.capacity; i < capacity; i++)
-		{
-			Data[i] = 0;
-		}
+
+		//for (int i = lst.capacity; i < capacity; i++)
+		//{
+		//	Data[i] = 0;
+		//}
+
 		return *this;
 	}
 
@@ -128,9 +135,9 @@ namespace iLab
 
 	template <typename T>			 List<typename T>::~List				()
 	{
-		std::free(Prev);
-		std::free(Data);
-		std::free(Next);
+		delete[] Prev;
+		delete[] Data;
+		delete[] Next;
 	}
 
 	template <typename T> void		 List<typename T>::Dump					()
@@ -154,11 +161,11 @@ namespace iLab
 	}
 
 	template <typename T> int		 List<typename T>::Insert				(int index, const T& value)
-	{
+	{		
 		bool status = CheckValidInsertIndex(index);
-		if (!status) return -1;
+		//if (!status) return -1;
 		
-		if (size == capacity or index >= capacity)
+		if (size == capacity or index >= capacity - 1)
 			ListResize();
 
 		int RealIndex = free;
@@ -170,6 +177,7 @@ namespace iLab
 			Next[free] = 0;
 			Prev[free] = 0;
 			Next[0] = free;
+			Prev[0] = free;
 		}
 		else
 		{
@@ -183,9 +191,9 @@ namespace iLab
 		free = next_free;
 		size += 1;
 
+
 		if (!ListIsSorted() and index != Prev[0])
 			list_is_sorted = false;
-
 		return RealIndex;
 	}
 
@@ -199,32 +207,34 @@ namespace iLab
 		return Insert(0, value);
 	}
 
-	template <typename T> T			 List<typename T>::Delete				(int index)
+	template <typename T> int		 List<typename T>::Delete				(int index)
 	{
 		bool status = CheckValidDeleteIndex(index);
-		if (!status) return -1;
+		//if (!status) return -1;
 		
+		int prev = Prev[index];
+
 		T data = Data[index];
 		Next[Prev[index]] = Next[index];
 		Prev[Next[index]] = Prev[index];
 		Next[index] = -free;
 		Prev[index] = -1;
 		free = index;
-		Data[index] = 0;
+		//Data[index] = 0;
 		size--;
 
 		if ((!ListIsSorted() and index != Prev[0]) or (!ListIsSorted() and index != Next[0]))
 			list_is_sorted = false;
 
-		return data;
+		return prev;
 	}
 
-	template <typename T> T			 List<typename T>::PopBack				()
+	template <typename T> int		 List<typename T>::PopBack				()
 	{
 		return Delete(Prev[0]);
 	}
 
-	template <typename T> T			 List<typename T>::PopFront				()
+	template <typename T> int		 List<typename T>::PopFront				()
 	{
 		return Delete(Next[0]);
 	}
@@ -321,16 +331,25 @@ namespace iLab
 
 	template <typename T> void		 List<typename T>::ListResize			()
 	{
-		int* NewPrev = (int*)_recalloc(Prev, 2 * capacity, sizeof(int));
-		T*   NewData = (T*)  _recalloc(Data, 2 * capacity, sizeof(T));
-		int* NewNext = (int*)_recalloc(Next, 2 * capacity, sizeof(int));
+		int* NewPrev = new int[2 * capacity];
+		T*   NewData = new T  [2 * capacity];
+		int* NewNext = new int[2 * capacity];
 
-		if (NewData and NewPrev and NewNext)
+		for (int i = 0; i < capacity; i++)
 		{
-			Prev = NewPrev;
-			Data = NewData;
-			Next = NewNext;
+			NewPrev[i] = Prev[i];
+			NewData[i] = Data[i];
+			NewNext[i] = Next[i];
 		}
+
+
+		delete[] Prev;
+		delete[] Data;
+		delete[] Next;
+			
+		Prev = NewPrev;
+		Data = NewData;
+		Next = NewNext;
 
 		Prev[capacity] = -1;
 		Next[capacity] = -int(capacity) - 1;
